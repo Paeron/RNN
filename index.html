@@ -1,0 +1,398 @@
+<html lang="en">
+<head>
+  <title>Displaying RNN</title>
+
+  <meta charset="utf-8">
+  <meta name="description" content="RNN">
+  <meta name="author" content="Per Jaakonantti">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <style>
+    body {
+      margin: auto;
+      text-align: center;
+      background-color: #f5f8fa;
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    }
+    blockquote.twitter-tweet {
+      background-color: #FFF;
+      display: inline-block;
+      font-family: "Helvetica Neue", Roboto, "Segoe UI", Calibri, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 16px;
+      border-color: #eee #ddd #bbb;
+      border-radius: 5px;
+      border-style: solid;
+      border-width: 1px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      margin: 10px 5px;
+      padding: 0 16px 16px 16px;
+      width: 80%;
+      max-width: 468px;
+      text-align: left;
+    }
+    blockquote.twitter-tweet p {
+      font-size: 16px;
+      font-weight: normal;
+      line-height: 20px;
+    }
+    blockquote.twitter-tweet a {
+      color: inherit;
+      font-weight: normal;
+      text-decoration: none;
+      outline: 0 none;
+    }
+    blockquote.twitter-tweet a:hover,
+    blockquote.twitter-tweet a:focus {
+      text-decoration: underline;
+    }
+    button {
+        border-radius: 15px;
+        margin: auto;
+        background-color: #1da1f2; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        margin-top: 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        max-width: 80%;
+    }
+    button:hover {
+      opacity: 0.7;
+    }
+    i {
+      color: #1da1f2;
+    }
+    .github:hover {
+      opacity: 0.5;
+    }
+    .tweetholder {
+      margin: auto;
+    }
+    #home {
+      display: none;
+    }
+    #loading {
+      margin: auto;
+      padding: 10%;
+    };
+  </style>
+</head>
+
+<body>
+  <div id="loading">
+    <i class="fa fa-spinner fa-pulse fa-4x fa-fw"></i>
+  </div>
+  <div class="container" id="home">
+    <div class="row align-items-start">
+      <h2>Donald J. Trump <i class="fa fa-check-circle" aria-hidden="true"></i> <a href = "" class="github"><i class="fa fa-github"> </i></a></h2>    
+      <p>45th and Final RNN of the United States of America</p>
+    </div>
+    <div class="row align-items-center tweetholder">
+      <blockquote class="twitter-tweet" data-lang="en">
+        <p lang="en" dir="ltr" id="text">
+          Despite the negative press covfefe
+        </p>
+        &mdash; Donald J. Trnn (@fakeDonaldTrump) 
+        <a>
+          June 11, 2017
+        </a>
+        <i class="fa fa-twitter" aria-hidden="true"></i>
+      </blockquote>
+    </div>
+    <div class="row align-items-center">
+      <button onclick="getTweetFromRNN()">Make my RNN Tweet again</button>
+    </div>
+    <div class="row align-items-center">
+      <h5>Disclaimer: These are not real tweets! They are created from my <a href="https://en.wikipedia.org/wiki/Recurrent_neural_network">Recurrent Neural Network</a> (RNN). Code is available on <a href="">Github</a>.</h5>
+    </div>
+  </div>
+  <script>
+  var characters = ' !"#$&' + "'" + '()*,-.0123579:?@abcdefghijklmnopqrstuvwxyz';
+  var b;
+  var c;
+  var U; 
+  var W;
+  var V;
+  var initH;
+  var len = 140;
+  var counter = 5;
+  var initX = zeros(1,characters.length);
+
+  var clientb = new XMLHttpRequest();
+  clientb.open('GET', 'bestRNNb.dat');
+  clientb.onload = (function(){
+    var txtb = clientb.responseText;
+    var arrb = [];
+    var linesb = txtb.split('\n');
+    for(j=0; j < linesb.length; j++) {
+      linesb[j] = Number(linesb[j]);
+    }
+    arrb = arrb.concat(linesb);
+    b = arrb;
+    b.pop();
+    b = vecTranspose(b);
+    counter = counter - 1;
+    if (counter == 0) {
+      document.getElementById("home").style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
+  })
+  clientb.send(null);
+
+  var clientc = new XMLHttpRequest();
+  clientc.open('GET', 'bestRNNc.dat');
+  clientc.onload = (function(){
+    var txtc = clientc.responseText;
+    var arrc = [];
+    var linesc = txtc.split('\n');
+    for(j=0; j < linesc.length; j++) {
+      linesc[j] = Number(linesc[j]);
+    }
+    arrc = arrc.concat(linesc);
+    c = arrc;
+    c.pop();
+    c = vecTranspose(c);
+    counter = counter - 1;
+    if (counter == 0) {
+      document.getElementById("home").style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
+  })
+  clientc.send(null);
+
+  var clientU = new XMLHttpRequest();
+  clientU.open('GET', 'bestRNNU.dat');
+  clientU.onload = (function(){
+    var txtU = clientU.responseText;
+    var arrU = [];
+    var linesU = txtU.split('\n');
+    for(j=0; j < linesU.length; j++) {
+      linesU[j] = linesU[j].replace(/"/g,'');
+      linesU[j] = linesU[j].split(',');
+      for(i=0; i < linesU[0].length; i++) {
+        linesU[j][i] = Number(linesU[j][i]);
+      }
+      arrU = arrU.concat([linesU[j]]);
+    }
+    U = arrU;
+    U.pop();
+    counter = counter - 1;
+    if (counter == 0) {
+      document.getElementById("home").style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
+  })
+  clientU.send(null);
+
+  var clientV = new XMLHttpRequest();
+  clientV.open('GET', 'bestRNNV.dat');
+  clientV.onload = (function(){
+    var txtV = clientV.responseText;
+    var arrV = [];
+    var linesV = txtV.split('\n');
+    for(j=0; j < linesV.length; j++) {
+      linesV[j] = linesV[j].replace(/"/g,'');
+      linesV[j] = linesV[j].split(',');
+      for(i=0; i < linesV[0].length; i++) {
+        linesV[j][i] = Number(linesV[j][i]);
+      }
+      arrV = arrV.concat([linesV[j]]);
+    }
+    V = arrV;
+    V.pop();
+    counter = counter - 1;
+    if (counter == 0) {
+      document.getElementById("home").style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
+  })
+  clientV.send(null);
+
+  var clientW = new XMLHttpRequest();
+  clientW.open('GET', 'bestRNNW.dat');
+  clientW.onload = (function(){
+    var txtW = clientW.responseText;
+    var arrW = [];
+    var linesW = txtW.split('\n');
+    for(j=0; j < linesW.length; j++) {
+      linesW[j] = linesW[j].replace(/"/g,'');
+      linesW[j] = linesW[j].split(',');
+      for(i=0; i < linesW[0].length; i++) {
+        linesW[j][i] = Number(linesW[j][i]);
+      }
+      arrW = arrW.concat([linesW[j]]);
+    }
+    W = arrW;
+    W.pop();
+    initH = zeros(1,W[0].length);
+    counter = counter - 1;
+    if (counter == 0) {
+      document.getElementById("home").style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
+  })
+  clientW.send(null);
+
+  function multiply(a, b) {
+    var aNumRows = a.length, aNumCols = a[0].length,
+        bNumRows = b.length, bNumCols = b[0].length,
+    m = new Array(aNumRows);  // initialize array of rows
+    for (var r = 0; r < aNumRows; ++r) {
+      m[r] = new Array(bNumCols); // initialize the current row
+      for (var c = 0; c < bNumCols; ++c) {
+        m[r][c] = 0;             // initialize the current cell
+        for (var i = 0; i < aNumCols; ++i) {
+          m[r][c] += a[r][i] * b[i][c];
+        }
+      }
+    }
+    return m;
+  }
+
+  function zeros(w,h) {
+    var aaa = []; var bbb = [];
+    for (var i = 0; i < w; ++i) {
+      aaa = aaa.concat(0)
+    }
+    aaa = [aaa];
+    for (var i = 0; i < h; ++i) {
+      bbb = bbb.concat(aaa)
+    }
+    return bbb
+  }
+
+  function transpose(array) {
+    var newArray = array[0].map(function(col, i) { 
+      return array.map(function(row) { 
+        return row[i] 
+      })
+    });
+    return newArray
+  }
+
+  function tanh(arr) {
+    var l = arr.length;
+    var newArr = zeros(1,l);
+    for (var i = 0; i < l; ++i) {
+      newArr[i] = Math.tanh(arr[i]);
+    }
+    return newArr;
+  }
+
+  function getTweetFromRNN() {
+    Y = zeros(1,len); 
+    initX[characters.indexOf('*')+1] = [1];
+    for (var j = 0; j < len; ++j) {
+      //console.log(j);
+      a = addMatrix(addMatrix(multiply(W,initH),multiply(U,initX),'164 a'),b,'164 b'); 
+      h = tanh(a);
+      o = addMatrix(multiply(V,vecTranspose(h)),c,'166');
+      p = softmax(o);
+      cp = cumsum(p); aa = Math.random();
+      ixs = ixsfinder(cp,aa); Y[j] = ixs;
+      initH = vecTranspose(h);
+      initX = zeros(1,characters.length);
+      initX[ixs] = [1];
+      Y[j] = ixs;
+    }
+    s = '';
+    i = 0;
+    star = false; 
+    while (star == false) {
+      i = i + 1;
+      if (i >= len) {
+        star = true;
+      }
+      else if (characters[Y[i]] == '*') {
+        star = true;
+      }  
+      else {
+        s = s + characters[Y[i]];
+      } 
+    }
+    if (s.indexOf('@') >= 0 || s.indexOf('#') >= 0) {
+      stemp = s.split(' ');
+      for (var j = 0; j < stemp.length; ++j) {
+        if (stemp[j][0] == '@') {
+          stemp[j] = '<a href="https://twitter.com/'+ stemp[j].substring(1) +'">' + stemp[j] + '</a>';
+        }
+        else if (stemp[j][0] == '#') {
+          stemp[j] = '<a href="https://twitter.com/hashtag/' + stemp[j].substring(1) + '?src=hash">' + stemp[j] + '</a>'
+        }
+      }
+      s = stemp.join(' ');
+    }
+    document.getElementById("text").innerHTML = s;
+    return s
+  }
+
+  function vecTranspose(vector) {
+    newVevtor = [];
+    for (var i = 0; i < vector.length; ++i) {
+      newVevtor[i] = [vector[i]];
+    }
+    return newVevtor
+  }
+
+  function ixsfinder(cp,aa) {
+    for (var i = 0; i < cp.length; ++i) {
+      cp[i] = (cp[i] - aa) > 0;
+    }
+    return cp.indexOf(true)
+  }
+
+  function add(a, b) {
+    return a + b;
+  }
+
+  function exp(arr) {
+    var soft = [];
+    for (var i = 0; i < arr.length; ++i) {
+      soft[i] = Math.exp(arr[i]);
+    }
+    return soft
+  }
+
+  function softmax(arr) {
+    var soft = exp(arr);
+    var sum = soft.reduce(add, 0);
+    for (var i = 0; i < arr.length; ++i) {
+      soft[i] = soft[i]/sum;
+    }
+    return soft;
+  }
+
+  function cumsum(arr) {
+    var newArr = []; temp =0;
+    for (var i = 0; i < arr.length; ++i) {
+      temp = temp + arr[i];
+      newArr[i] = temp;
+    }
+    return newArr;
+  }
+
+  function addMatrix(matrix1, matrix2,from) {
+    matrix = [[]];
+    for (var i = 0; i < matrix1.length; ++i) {
+      row = [];
+      for (var j = 0; j < matrix1[0].length; ++j) {
+        row[j] = Number(matrix1[i][j]) + Number(matrix2[i][j]);
+        if (String(row[j]) == 'NaN') {
+          row[j] = 0; console.log("WARNING" + from);
+        }
+      }
+      matrix[i] = row;
+    }
+    return matrix
+  }
+
+  </script>
+</body>
+</html>
